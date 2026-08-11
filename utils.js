@@ -1,27 +1,36 @@
-// Utility functions for various operations
-
-const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-const capitalizeFirstLetter = str => str.charAt(0).toUpperCase() + str.slice(1);
-
-const shuffleArray = array => {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+function parseJsonSafely(jsonString) {
+    try {
+        return JSON.parse(jsonString);
+    } catch (error) {
+        console.error('Parsing error:', error);
+        return null;
     }
-    return array;
-};
+}
 
-const debounce = (func, delay) => {
-    let timeoutId;
-    return (...args) => {
-        if (timeoutId) clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-            func.apply(this, args);
-        }, delay);
-    };
-};
+function mergeDeep(target, source) {
+    if (typeof target !== 'object' || target === null) {
+        return source;
+    }
+    if (typeof source !== 'object' || source === null) {
+        return target;
+    }
+    Object.keys(source).forEach((key) => {
+        if (typeof source[key] === 'object' && source[key] !== null) {
+            target[key] = mergeDeep(target[key], source[key]);
+        } else {
+            target[key] = source[key];
+        }
+    });
+    return target;
+}
 
-const deepClone = obj => Array.isArray(obj) ? obj.map(deepClone) : typeof obj === 'object' && obj !== null ? Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, deepClone(value)])) : obj;
+function isEmptyObject(obj) {
+    return Object.keys(obj).length === 0 && obj.constructor === Object;
+}
 
-export { getRandomInt, capitalizeFirstLetter, shuffleArray, debounce, deepClone };
+function formatDate(date, format) {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+}
+
+module.exports = { parseJsonSafely, mergeDeep, isEmptyObject, formatDate };
