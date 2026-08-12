@@ -1,34 +1,27 @@
-// @ts-check
-/**
- * Logger utility for logging messages with different severity levels.
- * @module logger
- */
+const fs = require('fs');
+const path = require('path');
 
-/**
- * Log levels for the logger.
- * @enum {string}
- */
-const LogLevel = {
-    INFO: 'INFO',
-    WARN: 'WARN',
-    ERROR: 'ERROR'
-};
+class Logger {
+    constructor(logFile) {
+        this.logFile = path.resolve(__dirname, logFile);
+        this.stream = fs.createWriteStream(this.logFile, { flags: 'a' });
+    }
 
-/**
- * Logs a message at the specified level.
- * 
- * @param {LogLevel} level - The level of the log.
- * @param {string} message - The message to log.
- * @param {Object} [data] - Additional data to include in the log.
- */
-function log(level, message, data) {
-    const timestamp = new Date().toISOString();
-    const logMessage = `${timestamp} [${level}]: ${message}`;
-    if (data) {
-        console.log(logMessage, data);
-    } else {
-        console.log(logMessage);
+    log(message) {
+        const timestamp = new Date().toISOString();
+        this.stream.write(`${timestamp} - ${message}\n`);
+    }
+
+    error(message) {
+        const timestamp = new Date().toISOString();
+        this.stream.write(`ERROR - ${timestamp} - ${message}\n`);
+    }
+
+    close() {
+        this.stream.end();
     }
 }
 
-module.exports = { LogLevel, log };
+const logger = new Logger('application.log');
+
+module.exports = logger;
