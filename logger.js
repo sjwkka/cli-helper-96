@@ -1,27 +1,31 @@
-const fs = require('fs');
-const path = require('path');
-
 class Logger {
-    constructor(logFile) {
-        this.logFile = path.resolve(__dirname, logFile);
-        this.stream = fs.createWriteStream(this.logFile, { flags: 'a' });
+    constructor() {
+        this.logs = [];
     }
 
     log(message) {
         const timestamp = new Date().toISOString();
-        this.stream.write(`${timestamp} - ${message}\n`);
+        this.logs.push(`[${timestamp}] ${message}`);
+        if (this.logs.length > 100) this.logs.shift();
     }
 
-    error(message) {
-        const timestamp = new Date().toISOString();
-        this.stream.write(`ERROR - ${timestamp} - ${message}\n`);
+    getLogs() {
+        return this.logs;
     }
 
-    close() {
-        this.stream.end();
+    clearLogs() {
+        this.logs = [];
     }
 }
 
-const logger = new Logger('application.log');
+const logger = new Logger();
 
-module.exports = logger;
+function logError(error) {
+    logger.log(`ERROR: ${error}`);
+}
+
+function logInfo(info) {
+    logger.log(`INFO: ${info}`);
+}
+
+module.exports = { logger, logError, logInfo };
