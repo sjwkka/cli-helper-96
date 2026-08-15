@@ -1,32 +1,48 @@
-const EventEmitter = require('events');
-
-class ClickHandler extends EventEmitter {
+class ClickHandler {
     constructor() {
-        super();
-        this.interval = null;
         this.isActive = false;
     }
 
-    startClicking(interval) {
-        if (this.isActive) return;
-        this.isActive = true;
-        this.interval = setInterval(() => this.emit('click'), interval);
+    start() {
+        try {
+            if (this.isActive) throw new Error('Autoclicker is already running.');
+            this.isActive = true;
+            this.handleClick();
+        } catch (error) {
+            this.logError(error);
+        }
     }
 
-    stopClicking() {
-        if (!this.isActive) return;
-        clearInterval(this.interval);
-        this.isActive = false;
+    stop() {
+        try {
+            if (!this.isActive) throw new Error('Autoclicker is not running.');
+            this.isActive = false;
+            console.log('Autoclicker stopped.');
+        } catch (error) {
+            this.logError(error);
+        }
     }
 
-    toggleClicking(interval) {
-        this.isActive ? this.stopClicking() : this.startClicking(interval);
+    handleClick() {
+        setInterval(() => {
+            try {
+                if (!this.isActive) return;
+                console.log('Click!');
+            } catch (error) {
+                this.logError(error);
+            }
+        }, 1000);
+    }
+
+    logError(error) {
+        console.error('Error:', error.message);
     }
 }
 
-module.exports = ClickHandler;
+const clickHandler = new ClickHandler();
+clickHandler.start();
 
-// Usage example:
-// const ClickHandler = require('./handler');
-// const clicker = new ClickHandler();
-// clicker.on('click', () => console.log('Click!'));
+process.on('SIGINT', () => {
+    clickHandler.stop();
+    process.exit();
+});
