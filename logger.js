@@ -1,34 +1,29 @@
+const fs = require('fs');
+const path = require('path');
+
 class Logger {
-    constructor(logLevel) {
-        this.logLevel = logLevel;
-        this.logLevels = { DEBUG: 0, INFO: 1, WARN: 2, ERROR: 3 };
-    }
-
-    log(message, level) {
-        if (this.logLevels[level] >= this.logLevels[this.logLevel]) {
-            console.log(`[${level}] ${new Date().toISOString()}: ${message}`);
+    constructor(logDir, maxFiles) {
+        this.logDir = logDir;
+        this.maxFiles = maxFiles;
+        if (!fs.existsSync(logDir)) {
+            fs.mkdirSync(logDir, { recursive: true });
         }
+        this.logFile = path.join(logDir, `log-${new Date().toISOString().slice(0, 10)}.txt`);
     }
 
-    debug(message) {
-        this.log(message, 'DEBUG');
+    log(message) {
+        const timestamp = new Date().toISOString();
+        fs.appendFileSync(this.logFile, `${timestamp} - ${message}\n`);
+        this.rotateLogs();
     }
 
-    info(message) {
-        this.log(message, 'INFO');
-    }
-
-    warn(message) {
-        this.log(message, 'WARN');
-    }
-
-    error(message) {
-        this.log(message, 'ERROR');
+    rotateLogs() {
+        const logFiles = fs.readdirSync(this.logDir).filter(file => file.startsWith('log-'));
+        if (logFiles.length > this.maxFiles) {
+            const oldestFile = logFiles.sort().shift();
+            fs.unlinkSync(path.join(this.logDir, oldestFile));
+        }
     }
 }
 
-const logger = new Logger('DEBUG');
-
-logger.info('Logger initialized');
-
-module.exports = logger;
+module.exports = Logger;
