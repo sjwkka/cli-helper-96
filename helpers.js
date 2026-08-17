@@ -1,34 +1,38 @@
-// Utility function to click at a specified interval
-function autoClicker(clickInterval) {
-    if (typeof clickInterval !== 'number' || clickInterval <= 0) {
-        console.error('Invalid click interval; must be a positive number.');
-        return;
-    }
+// Utility function to manage autoclicker data
+const fs = require('fs');
+
+// Load click configuration from JSON file
+function loadClickConfig(filePath) {
     try {
-        const click = () => {
-            // Simulating a mouse click
-            console.log('Mouse clicked!');
-        };
-        const intervalId = setInterval(click, clickInterval);
-        return intervalId;
+        const data = fs.readFileSync(filePath, 'utf8');
+        return JSON.parse(data);
     } catch (error) {
-        console.error('Error in autoClicker:', error.message);
+        console.error('Error loading click config:', error);
+        return null;
     }
 }
 
-// Example usage
-const interval = 1000; // 1 second
-const clickId = autoClicker(interval);
-
-// Function to stop the auto-clicking
-function stopAutoClicker(intervalId) {
-    if (intervalId) {
-        clearInterval(intervalId);
-        console.log('Auto-clicking stopped.');
-    } else {
-        console.error('No valid interval ID provided to stop.');
+// Save updated click configuration to JSON file
+function saveClickConfig(filePath, config) {
+    try {
+        const data = JSON.stringify(config, null, 2);
+        fs.writeFileSync(filePath, data);
+        console.log('Click config saved successfully.');
+    } catch (error) {
+        console.error('Error saving click config:', error);
     }
 }
 
-// Stop clicking after 10 seconds
-setTimeout(() => stopAutoClicker(clickId), 10000);
+// Calculate the next click time based on speed
+function calculateNextClickTime(speed) {
+    return Date.now() + (1000 / speed);
+}
+
+// Utility object to export functions
+const ClickConfigUtils = {
+    loadClickConfig,
+    saveClickConfig,
+    calculateNextClickTime
+};
+
+module.exports = ClickConfigUtils;
