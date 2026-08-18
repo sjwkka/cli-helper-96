@@ -1,38 +1,22 @@
-// Utility function to manage autoclicker data
-const fs = require('fs');
-
-// Load click configuration from JSON file
-function loadClickConfig(filePath) {
-    try {
-        const data = fs.readFileSync(filePath, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        console.error('Error loading click config:', error);
-        return null;
+function validateInput(input) {
+    if (typeof input !== 'number') {
+        throw new Error('Input must be a number');
+    }
+    if (input < 0) {
+        throw new Error('Input must be non-negative');
     }
 }
 
-// Save updated click configuration to JSON file
-function saveClickConfig(filePath, config) {
-    try {
-        const data = JSON.stringify(config, null, 2);
-        fs.writeFileSync(filePath, data);
-        console.log('Click config saved successfully.');
-    } catch (error) {
-        console.error('Error saving click config:', error);
+function processInputs(inputs) {
+    for (let i = 0; i < inputs.length; i++) {
+        try {
+            validateInput(inputs[i]);
+            console.log('Valid input:', inputs[i]); // process input
+        } catch (error) {
+            console.error('Error processing input:', error.message);
+        }
     }
 }
 
-// Calculate the next click time based on speed
-function calculateNextClickTime(speed) {
-    return Date.now() + (1000 / speed);
-}
-
-// Utility object to export functions
-const ClickConfigUtils = {
-    loadClickConfig,
-    saveClickConfig,
-    calculateNextClickTime
-};
-
-module.exports = ClickConfigUtils;
+const inputArray = [10, 'a', -5, 20, 15];
+processInputs(inputArray);
