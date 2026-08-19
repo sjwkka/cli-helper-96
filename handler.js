@@ -1,48 +1,31 @@
 class ClickHandler {
-    constructor() {
-        this.isActive = false;
+    constructor(clickInterval) {
+        this.clickInterval = clickInterval;
+        this.intervalId = null;
     }
 
-    start() {
-        try {
-            if (this.isActive) throw new Error('Autoclicker is already running.');
-            this.isActive = true;
+    startAutoClick() {
+        this.intervalId = setInterval(() => {
             this.handleClick();
-        } catch (error) {
-            this.logError(error);
-        }
-    }
-
-    stop() {
-        try {
-            if (!this.isActive) throw new Error('Autoclicker is not running.');
-            this.isActive = false;
-            console.log('Autoclicker stopped.');
-        } catch (error) {
-            this.logError(error);
-        }
+        }, this.clickInterval);
     }
 
     handleClick() {
-        setInterval(() => {
-            try {
-                if (!this.isActive) return;
-                console.log('Click!');
-            } catch (error) {
-                this.logError(error);
-            }
-        }, 1000);
+        // Simulating a click with console log
+        console.log('Clicked at: ' + new Date().toLocaleTimeString());
     }
 
-    logError(error) {
-        console.error('Error:', error.message);
+    stopAutoClick() {
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+        console.log('Auto clicking stopped.');
+    }
+
+    setClickInterval(newInterval) {
+        this.stopAutoClick();
+        this.clickInterval = newInterval;
+        this.startAutoClick();
     }
 }
 
-const clickHandler = new ClickHandler();
-clickHandler.start();
-
-process.on('SIGINT', () => {
-    clickHandler.stop();
-    process.exit();
-});
+module.exports = ClickHandler;
