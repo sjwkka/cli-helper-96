@@ -1,22 +1,32 @@
-function validateInput(input) {
-    if (typeof input !== 'number') {
-        throw new Error('Input must be a number');
-    }
-    if (input < 0) {
-        throw new Error('Input must be non-negative');
-    }
+function retryOperation(operation, retries, delay) {
+    return new Promise((resolve, reject) => {
+        const attempt = (remainingAttempts) => {
+            operation()
+                .then(resolve)
+                .catch((error) => {
+                    if (remainingAttempts === 0) {
+                        reject(error);
+                    } else {
+                        setTimeout(() => {
+                            attempt(remainingAttempts - 1);
+                        }, delay);
+                    }
+                });
+        };
+        attempt(retries);
+    });
 }
 
-function processInputs(inputs) {
-    for (let i = 0; i < inputs.length; i++) {
-        try {
-            validateInput(inputs[i]);
-            console.log('Valid input:', inputs[i]); // process input
-        } catch (error) {
-            console.error('Error processing input:', error.message);
-        }
+// Example network operation
+async function fetchData() {
+    const response = await fetch('https://api.example.com/data');
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
     }
+    return response.json();
 }
 
-const inputArray = [10, 'a', -5, 20, 15];
-processInputs(inputArray);
+// Usage of retryOperation
+retryOperation(fetchData, 5, 1000)
+    .then(data => console.log('Data fetched:', data))
+    .catch(error => console.error('Fetch failed:', error));
